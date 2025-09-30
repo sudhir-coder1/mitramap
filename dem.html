@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UP Map Connection Groups</title>
+    <title>Mitramap</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/854/854878.png" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         body {
@@ -124,12 +125,56 @@
 
         /* Connection/Map Section */
         .connection-box {
-            padding: 18px 20px;
-            background: #f0f0f0;
-            border-radius: 10px;
-            max-width: 420px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            padding: 28px 28px 22px 28px;
+            background: #f8fafc;
+            border-radius: 16px;
+            max-width: 480px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 24px rgba(6, 182, 212, 0.10);
+            border: 1.5px solid #e0e7ef;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .connection-heading {
+            font-size: 1.45rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .connection-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .connection-search {
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 1.04rem;
+            min-width: 180px;
+        }
+
+        .connection-filter {
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 1.04rem;
+            background: #fff;
+        }
+
+        .connection-desc {
+            color: #444;
+            font-size: 1.04rem;
+            margin-bottom: 18px;
+            text-align: center;
         }
 
         .group-list {
@@ -139,18 +184,26 @@
         }
 
         .group-item {
-            padding: 12px;
-            background: #06b6d4;
+            padding: 16px 14px;
+            background: linear-gradient(90deg, #06b6d4 80%, #2563eb 100%);
             color: #fff;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: relative;
             font-size: 1.08rem;
-            transition: background 0.2s;
+            transition: box-shadow 0.18s, background 0.18s, transform 0.13s;
             gap: 8px;
+            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.08);
+            margin-bottom: 8px;
+        }
+
+        .group-item:hover {
+            background: linear-gradient(90deg, #0891b2 80%, #2563eb 100%);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.13);
+            transform: translateY(-2px) scale(1.025);
         }
 
         .group-count {
@@ -229,6 +282,18 @@
 
         .group-menu-popup ul li {
             padding: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .member-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+            background: #f3f4f6;
         }
 
         .group-menu-popup ul li.leader {
@@ -307,10 +372,12 @@
             width: 100%;
             height: 500px;
             display: none;
-            border-radius: 12px;
+            border-radius: 16px;
             position: relative;
-            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.08);
-            margin-top: 10px;
+            box-shadow: 0 4px 24px rgba(37, 99, 235, 0.13);
+            margin-top: 14px;
+            background: #e0e7ef;
+            overflow: hidden;
         }
 
         .map-title {
@@ -325,13 +392,205 @@
             font-weight: bold;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
         }
+
+        .map-distance-filter {
+            position: absolute;
+            bottom: 18px;
+            right: 18px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px #2563eb22;
+            padding: 10px 14px 10px 14px;
+            font-size: 0.98rem;
+            z-index: 700;
+            min-width: 140px;
+            min-height: 54px;
+            border: 1.2px solid #e0e7ef;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .map-distance-filter input[type=range] {
+            width: 100%;
+            height: 4px;
+            accent-color: #2563eb;
+            background: linear-gradient(90deg, #06b6d4 0%, #2563eb 100%);
+            border-radius: 6px;
+            outline: none;
+            margin: 0 0 8px 0;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .map-distance-filter label {
+            font-size: 1.08rem;
+            color: #2563eb;
+            font-weight: 500;
+            margin-bottom: 4px;
+            letter-spacing: 0.2px;
+        }
+
+        .map-distance-filter select {
+            padding: 3px 7px;
+            border-radius: 6px;
+            border: 1.2px solid #cbd5e1;
+            font-size: 0.97rem;
+            background: #f8fafc;
+            color: #222;
+            margin-bottom: 2px;
+            transition: border 0.18s, box-shadow 0.18s;
+            box-shadow: 0 1px 2px #2563eb11;
+        }
+
+        .map-distance-filter input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #ffd700;
+            border: 2.5px solid #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0002;
+            transition: background 0.2s;
+        }
+
+        .map-distance-filter input[type=range]:hover::-webkit-slider-thumb {
+            background: #ffe066;
+        }
+
+        .map-distance-filter input[type=range]::-moz-range-thumb {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #ffd700;
+            border: 2.5px solid #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0002;
+            transition: background 0.2s;
+        }
+
+        .map-distance-filter input[type=range]:hover::-moz-range-thumb {
+            background: #ffe066;
+        }
+
+        .map-distance-filter input[type=range]::-ms-thumb {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #ffd700;
+            border: 2.5px solid #2563eb;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0002;
+            transition: background 0.2s;
+        }
+
+        .map-distance-filter input[type=range]:hover::-ms-thumb {
+            background: #ffe066;
+        }
+
+        .map-distance-filter input[type=range]:focus {
+            outline: none;
+        }
+
+        .map-distance-filter span#distanceValue {
+            font-size: 0.98rem;
+            color: #06b6d4;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+            background: #f1f5f9;
+            border-radius: 5px;
+            padding: 1px 4px;
+            margin-left: 3px;
+            margin-top: 1px;
+            display: inline-block;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            z-index: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .map-btn-download {
+            background: #10b981;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 13px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0001;
+            margin-top: 8px;
+            transition: background 0.18s;
+        }
+
+        .map-btn-download:hover {
+            background: #059669;
+        }
+
+        .map-btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 13px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #0001;
+            transition: background 0.18s;
+        }
+
+        .map-btn:hover {
+            background: #1e40af;
+        }
+
+        .map-legend {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px #0002;
+            padding: 10px 18px 10px 12px;
+            font-size: 1.01rem;
+            z-index: 600;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .legend-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #2563eb;
+            background: #f3f4f6;
+            margin-right: 6px;
+        }
+
+        .legend-label {
+            color: #222;
+            font-size: 1rem;
+        }
     </style>
 </head>
 
 <body>
 
     <header>
-        <div class="logo">MITRAMAP</div>
+        <div class="logo" style="display:flex;align-items:center;gap:8px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Mitramap Logo"
+                style="height:32px;width:32px;vertical-align:middle;">
+            <span>MITRAMAP</span>
+        </div>
         <nav>
             <a id="connectionBtn">CONNECTION</a>
             <a id="mapBtn">MAP</a>
@@ -341,7 +600,11 @@
     <div class="content">
         <section id="homeSection" style="display:block;">
             <div class="hero">
-                <h1>Welcome to Mitramap</h1>
+                <h1 style="display:flex;align-items:center;justify-content:center;gap:12px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Mitramap Logo"
+                        style="height:40px;width:40px;vertical-align:middle;">
+                    <span>Mitramap</span>
+                </h1>
                 <p class="subtitle">Visualize and explore group connections across Uttar Pradesh cities.</p>
                 <button id="getStartedBtn">Get Started</button>
             </div>
@@ -361,10 +624,38 @@
             </div>
         </section>
         <div class="connection-box" id="connectionBox" style="display:none;">
+            <div class="connection-heading">Groups & Connections</div>
+            <div class="connection-desc">Explore all city groups, see their leaders, and view connections on the map.
+                Click a group to view details and map connections.</div>
+            <div class="connection-controls">
+                <input type="text" id="groupSearch" class="connection-search" placeholder="Search group/member..." />
+                <select id="cityFilter" class="connection-filter">
+                    <option value="">All Cities</option>
+                </select>
+            </div>
             <div class="group-list" id="groupList"></div>
         </div>
         <div id="mapArea">
             <div class="map-title" id="mapTitle"></div>
+            <div class="map-distance-filter" id="distanceFilterBox" style="display:none;">
+                <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px;">
+                    <label for="distanceMember">Reference:</label>
+                    <select id="distanceMember"></select>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <label for="distanceSlider">Distance (km):</label>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <input type="range" min="1" max="50" value="50" id="distanceSlider">
+                        <span id="distanceValue">50</span>
+                    </div>
+                </div>
+            </div>
+            <div class="map-controls">
+                <button class="map-btn" id="zoomInBtn" title="Zoom In">+</button>
+                <button class="map-btn" id="zoomOutBtn" title="Zoom Out">-</button>
+                <button class="map-btn" id="resetMapBtn" title="Reset View">⟳</button>
+                <button class="map-btn-download" id="downloadMapBtn" title="Download Map Snapshot">Download Map</button>
+            </div>
         </div>
     </div>
 
@@ -381,52 +672,64 @@
         const getStartedBtn = document.getElementById('getStartedBtn');
 
         // Fixed city locations in specific cities of UP with members in 5 different directions
+        // Helper to generate random members near a city
+        function generateMembers(center, names, count) {
+            const [lat, lng] = center;
+            return Array.from({ length: count }, (_, i) => ({
+                name: names[i % names.length],
+                coords: [
+                    +(lat + (Math.random() - 0.5) * 0.025).toFixed(6),
+                    +(lng + (Math.random() - 0.5) * 0.025).toFixed(6)
+                ]
+            }));
+        }
+
         const groups = [
             {
-                name: 'Group 1', members: [
-                    { name: 'Amit', coords: [25.5842, 83.5800] },
-                    { name: 'Suresh', coords: [25.5852, 83.5810] },
-                    { name: 'Priya', coords: [25.5835, 83.5825] },
-                    { name: 'Rohit', coords: [25.5860, 83.5785] },
-                    { name: 'Neha', coords: [25.5870, 83.5795] }
-                ], leaderIndex: 1
-            }, // Ghazipur
+                city: 'Ghazipur',
+                members: generateMembers(
+                    [25.5842, 83.5800],
+                    ['Amit', 'Suresh', 'Priya', 'Rohit', 'Neha', 'Rakesh', 'Poonam', 'Vikas', 'Megha', 'Sanjana', 'Ravi', 'Kiran', 'Ankit', 'Shivani', 'Manish'],
+                    10
+                ),
+                leaderIndex: 1
+            },
             {
-                name: 'Group 2', members: [
-                    { name: 'Vikram', coords: [26.8467, 80.9462] },
-                    { name: 'Anjali', coords: [26.8477, 80.9472] },
-                    { name: 'Deepak', coords: [26.8455, 80.9455] },
-                    { name: 'Sunita', coords: [26.8480, 80.9440] },
-                    { name: 'Manoj', coords: [26.8490, 80.9480] }
-                ], leaderIndex: 1
-            }, // Lucknow
+                city: 'Lucknow',
+                members: generateMembers(
+                    [26.8467, 80.9462],
+                    ['Vikram', 'Anjali', 'Deepak', 'Sunita', 'Manoj', 'Aarav', 'Nisha', 'Gaurav', 'Komal', 'Ritu', 'Sandeep', 'Payal', 'Harsh', 'Divya', 'Aman'],
+                    12
+                ),
+                leaderIndex: 1
+            },
             {
-                name: 'Group 3', members: [
-                    { name: 'Ritu', coords: [25.4358, 81.8463] },
-                    { name: 'Sanjay', coords: [25.4368, 81.8473] },
-                    { name: 'Pooja', coords: [25.4348, 81.8453] },
-                    { name: 'Arjun', coords: [25.4378, 81.8443] },
-                    { name: 'Meena', coords: [25.4388, 81.8483] }
-                ], leaderIndex: 1
-            }, // Varanasi
+                city: 'Varanasi',
+                members: generateMembers(
+                    [25.4358, 81.8463],
+                    ['Ritu', 'Sanjay', 'Pooja', 'Arjun', 'Meena', 'Ajay', 'Sneha', 'Kartik', 'Simran', 'Yash', 'Preeti', 'Rahul', 'Sapna', 'Amit', 'Kavya'],
+                    9
+                ),
+                leaderIndex: 1
+            },
             {
-                name: 'Group 4', members: [
-                    { name: 'Rahul', coords: [27.1767, 78.0081] },
-                    { name: 'Kavita', coords: [27.1777, 78.0091] },
-                    { name: 'Nitin', coords: [27.1757, 78.0071] },
-                    { name: 'Shalini', coords: [27.1787, 78.0061] },
-                    { name: 'Aakash', coords: [27.1797, 78.0101] }
-                ], leaderIndex: 1
-            }, // Agra
+                city: 'Agra',
+                members: generateMembers(
+                    [27.1767, 78.0081],
+                    ['Rahul', 'Kavita', 'Nitin', 'Shalini', 'Aakash', 'Ramesh', 'Bhavna', 'Tarun', 'Isha', 'Rajiv', 'Pallavi', 'Saurabh', 'Tanya', 'Vinay'],
+                    11
+                ),
+                leaderIndex: 1
+            },
             {
-                name: 'Group 5', members: [
-                    { name: 'Sneha', coords: [28.6139, 77.2090] },
-                    { name: 'Rajesh', coords: [28.6149, 77.2100] },
-                    { name: 'Pankaj', coords: [28.6129, 77.2080] },
-                    { name: 'Geeta', coords: [28.6159, 77.2070] },
-                    { name: 'Mohit', coords: [28.6169, 77.2110] }
-                ], leaderIndex: 1
-            }  // Delhi (example)
+                city: 'Delhi',
+                members: generateMembers(
+                    [28.6139, 77.2090],
+                    ['Sneha', 'Rajesh', 'Pankaj', 'Geeta', 'Mohit', 'Ayesha', 'Karan', 'Shreya', 'Abhishek', 'Nidhi', 'Rohit', 'Priyanka', 'Sahil', 'Tanvi'],
+                    13
+                ),
+                leaderIndex: 1
+            }
         ];
 
         let selectedGroup = null;
@@ -443,20 +746,24 @@
             mapArea.style.display = 'none';
         }
 
-        function connectionClick() {
-            setActiveNav(connectionBtn);
-            homeSection.style.display = 'none';
-            connectionBox.style.display = 'block';
-            mapArea.style.display = 'none';
+        function renderGroups(filterCity = '', searchTerm = '') {
             groupList.innerHTML = '';
-
-            groups.forEach((grp, idx) => {
+            let filteredGroups = groups;
+            if (filterCity) filteredGroups = filteredGroups.filter(g => g.city === filterCity);
+            if (searchTerm) {
+                const st = searchTerm.trim().toLowerCase();
+                filteredGroups = filteredGroups.filter(g =>
+                    g.city.toLowerCase().includes(st) ||
+                    g.members.some(m => m.name.toLowerCase().includes(st))
+                );
+            }
+            filteredGroups.forEach((grp, idx) => {
                 const div = document.createElement('div');
                 div.className = 'group-item';
 
-                // Group name clickable area
+                // Group name clickable area (city)
                 const nameSpan = document.createElement('span');
-                nameSpan.textContent = grp.name;
+                nameSpan.textContent = grp.city + ' Group';
                 nameSpan.style.flex = '1';
                 nameSpan.addEventListener('click', () => {
                     selectedGroup = grp;
@@ -464,7 +771,7 @@
                     homeSection.style.display = 'none';
                     connectionBox.style.display = 'none';
                     mapArea.style.display = 'block';
-                    mapTitle.textContent = grp.name;
+                    mapTitle.textContent = grp.city + ' Group';
                     showGroupOnMap(grp);
                 });
                 div.appendChild(nameSpan);
@@ -487,7 +794,7 @@
                 popup.className = 'group-menu-popup';
                 popup.innerHTML = `
                     <div class="popup-title">Members</div>
-                    <ul>${grp.members.map((m, i) => `<li${i === grp.leaderIndex ? ' class=\'leader\'' : ''}>${m.name}${i === grp.leaderIndex ? ' (Leader)' : ''}</li>`).join('')}</ul>
+                    <ul>${grp.members.map((m, i) => `<li${i === grp.leaderIndex ? ' class=\"leader\"' : ''}><img src='https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(m.name)}&backgroundColor=transparent' alt='avatar' class='member-avatar'/> ${m.name}${i === grp.leaderIndex ? ' (Leader)' : ''}</li>`).join('')}</ul>
                     <div class="popup-count">Total: ${grp.members.length}</div>
                 `;
                 div.appendChild(popup);
@@ -512,32 +819,150 @@
             });
         }
 
-        function showGroupOnMap(group) {
-            mapTitle.textContent = group.name;
+        // Preserve search/filter state
+        let lastSearch = '';
+        let lastFilter = '';
+        function connectionClick() {
+            setActiveNav(connectionBtn);
+            homeSection.style.display = 'none';
+            connectionBox.style.display = 'block';
+            mapArea.style.display = 'none';
 
-            if (!window.upMap) {
-                window.upMap = L.map('mapArea').setView(group.members[0].coords, 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>' }).addTo(window.upMap);
-            } else {
-                window.upMap.eachLayer(layer => { if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.CircleMarker) window.upMap.removeLayer(layer); });
-                window.upMap.setView(group.members[0].coords, 14);
+            // Populate city filter
+            const cityFilter = document.getElementById('cityFilter');
+            cityFilter.innerHTML = '<option value="">All Cities</option>' +
+                Array.from(new Set(groups.map(g => g.city))).map(city => `<option value="${city}">${city}</option>`).join('');
+
+            // Restore last search/filter
+            const groupSearch = document.getElementById('groupSearch');
+            groupSearch.value = lastSearch;
+            cityFilter.value = lastFilter;
+            renderGroups(cityFilter.value, groupSearch.value);
+
+            // Search/filter events
+            groupSearch.oninput = () => {
+                lastSearch = groupSearch.value;
+                renderGroups(cityFilter.value, groupSearch.value);
+            };
+            cityFilter.onchange = () => {
+                lastFilter = cityFilter.value;
+                renderGroups(cityFilter.value, groupSearch.value);
+            };
+        }
+
+        function showGroupOnMap(group) {
+            mapTitle.textContent = group.city + ' Group';
+
+
+            // Distance filter UI
+            const filterBox = document.getElementById('distanceFilterBox');
+            filterBox.style.display = 'flex';
+            const slider = document.getElementById('distanceSlider');
+            const sliderValue = document.getElementById('distanceValue');
+            const memberSelect = document.getElementById('distanceMember');
+            // Populate member dropdown
+            memberSelect.innerHTML = group.members.map((m, i) => `<option value="${i}"${i === group.leaderIndex ? ' selected' : ''}>${m.name}${i === group.leaderIndex ? ' (Leader)' : ''}</option>`).join('');
+            sliderValue.textContent = slider.value;
+
+            function drawMapWithDistance(maxDistance, refIndex) {
+                if (!window.upMap) {
+                    window.upMap = L.map('mapArea').setView(group.members[refIndex].coords, 14);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>' }).addTo(window.upMap);
+                } else {
+                    window.upMap.eachLayer(layer => { if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.CircleMarker) window.upMap.removeLayer(layer); });
+                    window.upMap.setView(group.members[refIndex].coords, 14);
+                }
+                const refMember = group.members[refIndex];
+                group.members.forEach((m, i) => {
+                    const dist = calcDistance(refMember.coords[0], refMember.coords[1], m.coords[0], m.coords[1]);
+                    if (i === refIndex || dist <= maxDistance) {
+                        const avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(m.name)}&backgroundColor=transparent`;
+                        const iconHtml = `<div style='display:flex;flex-direction:column;align-items:center;'>
+                            <img src='${avatarUrl}' alt='avatar' style='width:38px;height:38px;border-radius:50%;border:2px solid ${i === refIndex ? '#2563eb' : '#06b6d4'};background:#fff;box-shadow:0 1px 4px #0001;'>
+                            <span style='font-size:11px;color:#222;background:#fff;border-radius:6px;padding:0 4px;margin-top:2px;'>${m.name}${i === refIndex ? '⭐' : ''}</span>
+                        </div>`;
+                        const marker = L.marker(m.coords, {
+                            icon: L.divIcon({
+                                className: 'member-map-avatar',
+                                html: iconHtml,
+                                iconSize: [44, 54],
+                                iconAnchor: [22, 44],
+                                popupAnchor: [0, -40]
+                            })
+                        }).addTo(window.upMap);
+                        marker.on('click', function () {
+                            const profileHtml = `
+                                <div style='text-align:center;min-width:170px;'>
+                                    <img src='${avatarUrl}' alt='avatar' style='width:54px;height:54px;border-radius:50%;border:2.5px solid ${i === refIndex ? '#2563eb' : '#06b6d4'};background:#fff;box-shadow:0 1px 4px #0001;margin-bottom:6px;'>
+                                    <div style='font-weight:bold;font-size:1.08rem;margin-bottom:2px;'>${m.name}${i === refIndex ? ' <span style=\'color:#2563eb\'>(Reference)</span>' : ''}</div>
+                                    <div style='font-size:0.98rem;color:#444;'>City: <b>${group.city}</b></div>
+                                    <div style='font-size:0.97rem;color:#666;'>Lat: ${m.coords[0]}, Lng: ${m.coords[1]}</div>
+                                </div>
+                            `;
+                            marker.bindPopup(profileHtml).openPopup();
+                        });
+                        if (i !== refIndex) {
+                            const line = L.polyline([refMember.coords, m.coords], { color: 'red' }).addTo(window.upMap);
+                            const midLat = (refMember.coords[0] + m.coords[0]) / 2;
+                            const midLng = (refMember.coords[1] + m.coords[1]) / 2;
+                            const distance = calcDistance(refMember.coords[0], refMember.coords[1], m.coords[0], m.coords[1]);
+                            L.marker([midLat, midLng], {
+                                icon: L.divIcon({ className: 'distance-label', html: `<div style='background:#fff;padding:2px 5px;border-radius:3px;font-size:12px;'>${distance} km</div>` })
+                            }).addTo(window.upMap);
+                        }
+                    }
+                });
             }
 
-            const leader = group.members[group.leaderIndex];
+            // Initial draw
+            let refIndex = parseInt(memberSelect.value);
+            drawMapWithDistance(Number(slider.value), refIndex);
 
-            group.members.forEach(m => {
-                const color = (m === leader) ? 'red' : 'blue';
-                L.circleMarker(m.coords, { radius: 10, color: color, fillColor: color, fillOpacity: 0.9 }).addTo(window.upMap).bindPopup(m.name + (m === leader ? ' (Leader)' : ''));
-                if (m !== leader) {
-                    const line = L.polyline([leader.coords, m.coords], { color: 'red' }).addTo(window.upMap);
-                    const midLat = (leader.coords[0] + m.coords[0]) / 2;
-                    const midLng = (leader.coords[1] + m.coords[1]) / 2;
-                    const distance = calcDistance(leader.coords[0], leader.coords[1], m.coords[0], m.coords[1]);
-                    L.marker([midLat, midLng], {
-                        icon: L.divIcon({ className: 'distance-label', html: `<div style='background:#fff;padding:2px 5px;border-radius:3px;font-size:12px;'>${distance} km</div>` })
-                    }).addTo(window.upMap);
+            // Slider event
+            slider.oninput = function () {
+                sliderValue.textContent = slider.value;
+                refIndex = parseInt(memberSelect.value);
+                drawMapWithDistance(Number(slider.value), refIndex);
+            };
+            // Member dropdown event
+            memberSelect.onchange = function () {
+                refIndex = parseInt(memberSelect.value);
+                drawMapWithDistance(Number(slider.value), refIndex);
+            };
+
+            // Map controls
+            document.getElementById('zoomInBtn').onclick = () => window.upMap.zoomIn();
+            document.getElementById('zoomOutBtn').onclick = () => window.upMap.zoomOut();
+            document.getElementById('resetMapBtn').onclick = () => window.upMap.setView(group.members[0].coords, 14);
+
+            // Map snapshot download
+            document.getElementById('downloadMapBtn').onclick = () => {
+                if (window.L && window.L.easyPrint) {
+                    window.L.easyPrint({
+                        tileLayer: window.upMap._layers,
+                        sizeModes: ['Current'],
+                        filename: 'mitramap-snapshot',
+                        exportOnly: true
+                    }).printMap('CurrentSize', 'mitramap-snapshot');
+                } else {
+                    if (window.html2canvas) {
+                        html2canvas(document.getElementById('mapArea')).then(canvas => {
+                            const link = document.createElement('a');
+                            link.download = 'mitramap-snapshot.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        });
+                    } else {
+                        alert('Snapshot feature needs html2canvas library.');
+                    }
                 }
-            });
+            };
+        }
+        // Optionally load html2canvas for snapshot if not present
+        if (!window.html2canvas) {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+            document.body.appendChild(script);
         }
 
         function calcDistance(lat1, lon1, lat2, lon2) {
