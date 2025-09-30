@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UP Map Connection Groups</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+  body {margin:0;font-family:Arial,sans-serif;}
+  header {display:flex;justify-content:space-between;align-items:center;padding:10px 20px;background:#333;color:#fff;position:fixed;top:0;left:0;right:0;z-index:1000;}
+  header .logo{font-size:20px;font-weight:bold;}
+  header nav a{color:#fff;margin:0 10px;text-decoration:none;font-size:16px;cursor:pointer;}
+  .content{margin-top:60px;padding:20px;}
+  .connection-box{padding:15px;background:#f0f0f0;border-radius:8px;max-width:400px;margin-bottom:20px;}
+  .group-list{display:flex;flex-direction:column;gap:10px;}
+  .group-item{padding:10px;background:#06b6d4;color:#fff;border-radius:8px;cursor:pointer;}
+  #mapArea{width:100%;height:500px;display:none;border-radius:8px;}
+  .distance-display{margin-top:10px;font-weight:bold;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">MySite</div>
+  <nav>
+    <a id="connectionBtn">CONNECTION</a>
+    <a id="mapBtn">MAP</a>
+  </nav>
+</header>
+
+<div class="content">
+  <div class="connection-box" id="connectionBox" style="display:none;">
+    <div id="status">Select a group to show map</div>
+    <div class="group-list" id="groupList"></div>
+    <div class="distance-display" id="distanceDisplay"></div>
+  </div>
+
+  <div id="mapArea"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const connectionBtn = document.getElementById('connectionBtn');
+  const mapArea = document.getElementById('mapArea');
+  const connectionBox = document.getElementById('connectionBox');
+  const groupList = document.getElementById('groupList');
+  const distanceDisplay = document.getElementById('distanceDisplay');
+
+  // Demo groups with members and coordinates
+  const groups = [
+    {name:'Group 1', members:[{name:'U1', coords:[26.8467,80.9462]},{name:'U2', coords:[25.3176,82.9739]}]},
+    {name:'Group 2', members:[{name:'U3', coords:[26.4499,80.3319]},{name:'U4', coords:[27.1767,78.0081]}]},
+    {name:'Group 3', members:[{name:'U5', coords:[25.4358,81.8463]},{name:'U6', coords:[28.6139,77.2090]}]}
+  ];
+
+  function calcDistance(lat1, lon1, lat2, lon2){
+    const R=6371;
+    const dLat=(lat2-lat1)*Math.PI/180;
+    const dLon=(lon2-lon1)*Math.PI/180;
+    const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    return (R*c).toFixed(2);
+  }
+
+  // Show groups on CONNECTION click
+  connectionBtn.addEventListener('click',()=>{
+    connectionBox.style.display='block';
+    mapArea.style.display='none';
+    groupList.innerHTML='';
+    distanceDisplay.textContent='';
+
+    groups.forEach((grp,i)=>{
+      const div = document.createElement('div');
+      div.className='group-item';
+      div.textContent = grp.name;
+      div.addEventListener('click',()=>{
+        mapArea.style.display='block';
+        showGroupOnMap(grp);
+      });
+      groupList.appendChild(div);
+    });
+  });
+
+  function showGroupOnMap(group){
+    distanceDisplay.textContent='';
+    if(!window.upMap){
+      window.upMap = L.map('mapArea');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'}).addTo(window.upMap);
+    } else {
+      window.upMap.eachLayer(layer=>{ if(layer instanceof L.Marker || layer instanceof L.Polyline) window.upMap.removeLayer(layer); });
+    }
+    const upBounds = [[23.8,77.0],[30.4,84.9]];
+    window.upMap.fitBounds(upBounds);
+
+    const coords = group.members.map(m=>m.coords);
+    group.members.forEach(m=>{ L.marker(m.coords).addTo(window.upMap).bindPopup(m.name); });
+    if(coords.length>1){
+      L.polyline(coords,{color:'red'}).addTo(window.upMap);
+      const d = calcDistance(coords[0][0],coords[0][1],coords[1][0],coords[1][1]);
+      distanceDisplay.textContent = `Distance between ${group.members[0].name} and ${group.members[1].name}: ${d} km`;
+    }
+  }
+
+  // MAP button shows only map
+  document.getElementById('mapBtn').addEventListener('click',()=>{
+    mapArea.style.display='block';
+    connectionBox.style.display='none';
+    if(!window.upMap){
+      window.upMap = L.map('mapArea');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'}).addTo(window.upMap);
+      const upBounds = [[23.8,77.0],[30.4,84.9]];
+      window.upMap.fitBounds(upBounds);
+    }
+  });
+</script>
+</body>
+</html>
