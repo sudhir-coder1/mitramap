@@ -928,6 +928,10 @@
             filterBox.style.display = 'flex';
             const distanceInput = document.getElementById('distanceNumber');
             const memberSelect = document.getElementById('distanceMember');
+            // Set default value to 5 if not already set
+            if (!distanceInput.value || distanceInput.value === '50') {
+                distanceInput.value = 3;
+            }
             // Populate member dropdown
             memberSelect.innerHTML = group.members.map((m, i) => `<option value="${i}"${i === group.leaderIndex ? ' selected' : ''}>${m.name}${i === group.leaderIndex ? ' (Leader)' : ''}</option>`).join('');
             // No slider value span needed
@@ -953,10 +957,17 @@
                     window.upMap = L.map('mapArea').setView(group.members[refIndex].coords, 14);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>' }).addTo(window.upMap);
                 } else {
-                    window.upMap.eachLayer(layer => { if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.CircleMarker) window.upMap.removeLayer(layer); });
+                    window.upMap.eachLayer(layer => { if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.CircleMarker || layer instanceof L.Circle) window.upMap.removeLayer(layer); });
                     window.upMap.setView(group.members[refIndex].coords, 14);
                 }
                 const refMember = group.members[refIndex];
+                // Draw circle for filter area
+                const circle = L.circle(refMember.coords, {
+                    color: '#2563eb',
+                    fillColor: '#2563eb22',
+                    fillOpacity: 0.25,
+                    radius: maxDistance * 1000 // km to meters
+                }).addTo(window.upMap);
                 group.members.forEach((m, i) => {
                     const dist = calcDistance(refMember.coords[0], refMember.coords[1], m.coords[0], m.coords[1]);
                     if (i === refIndex || dist <= maxDistance) {
@@ -974,6 +985,7 @@
                                 popupAnchor: [0, -40]
                             })
                         }).addTo(window.upMap);
+                        // Always set popup content and open on every click
                         marker.on('click', function () {
                             const profileHtml = `
                                 <div style='text-align:center;min-width:170px;'>
@@ -983,7 +995,8 @@
                                     <div style='font-size:0.97rem;color:#666;'>Lat: ${m.coords[0]}, Lng: ${m.coords[1]}</div>
                                 </div>
                             `;
-                            marker.bindPopup(profileHtml).openPopup();
+                            marker.setPopupContent(profileHtml);
+                            marker.openPopup();
                         });
                         if (i !== refIndex) {
                             const line = L.polyline([refMember.coords, m.coords], { color: 'red' }).addTo(window.upMap);
