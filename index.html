@@ -14,6 +14,71 @@
             background: #f8fafc;
         }
 
+        @media (max-width: 700px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px 8px;
+            }
+
+            header .logo {
+                font-size: 18px;
+                margin-bottom: 6px;
+            }
+
+            header nav {
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+                gap: 0;
+            }
+
+            header nav a {
+                font-size: 15px;
+                margin: 0 6px;
+                padding: 6px 0;
+            }
+
+            .content {
+                padding: 10px 2vw;
+                margin-top: 90px;
+            }
+
+            #mapArea {
+                height: 340px !important;
+                min-height: 220px;
+            }
+
+            .map-title {
+                font-size: 1.01rem;
+                padding: 4px 8px;
+            }
+
+            .map-distance-filter {
+                min-width: 90px;
+                min-height: 40px;
+                padding: 7px 7px 7px 7px;
+                font-size: 0.93rem;
+                gap: 5px;
+                right: 6px;
+                bottom: 6px;
+            }
+
+            .map-distance-filter select {
+                font-size: 0.93rem;
+                padding: 2px 4px;
+            }
+
+            .map-distance-filter input[type=range] {
+                height: 3px;
+            }
+
+            .map-distance-filter span#distanceValue {
+                font-size: 0.93rem;
+                padding: 1px 3px;
+            }
+        }
+
         header {
             display: flex;
             justify-content: space-between;
@@ -637,20 +702,24 @@
         </div>
         <div id="mapArea">
             <div class="map-title" id="mapTitle"></div>
+            <button id="toggleMapUIBtn" title="Show/hide map controls & filter"
+                style="position:absolute;bottom:90px;right:18px;z-index:800;background:#2563eb;color:#fff;border:none;border-radius:50%;width:38px;height:38px;box-shadow:0 2px 8px #0002;font-size:1.3rem;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0.92;transition:background 0.18s;">
+                <span id="toggleMapUIIcon">👁️</span>
+            </button>
             <div class="map-distance-filter" id="distanceFilterBox" style="display:none;">
                 <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px;">
                     <label for="distanceMember">Reference:</label>
                     <select id="distanceMember"></select>
                 </div>
                 <div style="display:flex;flex-direction:column;gap:4px;">
-                    <label for="distanceSlider">Distance (km):</label>
+                    <label for="distanceNumber">Distance (km):</label>
                     <div style="display:flex;align-items:center;gap:10px;">
-                        <input type="range" min="1" max="50" value="50" id="distanceSlider">
-                        <span id="distanceValue">50</span>
+                        <input type="number" min="1" max="50" value="50" id="distanceNumber"
+                            style="width:60px;padding:3px 6px;border-radius:5px;border:1.2px solid #cbd5e1;font-size:1.01rem;">
                     </div>
                 </div>
             </div>
-            <div class="map-controls">
+            <div class="map-controls" id="mapControlsBox">
                 <button class="map-btn" id="zoomInBtn" title="Zoom In">+</button>
                 <button class="map-btn" id="zoomOutBtn" title="Zoom Out">-</button>
                 <button class="map-btn" id="resetMapBtn" title="Reset View">⟳</button>
@@ -857,12 +926,27 @@
             // Distance filter UI
             const filterBox = document.getElementById('distanceFilterBox');
             filterBox.style.display = 'flex';
-            const slider = document.getElementById('distanceSlider');
-            const sliderValue = document.getElementById('distanceValue');
+            const distanceInput = document.getElementById('distanceNumber');
             const memberSelect = document.getElementById('distanceMember');
             // Populate member dropdown
             memberSelect.innerHTML = group.members.map((m, i) => `<option value="${i}"${i === group.leaderIndex ? ' selected' : ''}>${m.name}${i === group.leaderIndex ? ' (Leader)' : ''}</option>`).join('');
-            sliderValue.textContent = slider.value;
+            // No slider value span needed
+
+            // Map UI toggle logic
+            const toggleBtn = document.getElementById('toggleMapUIBtn');
+            const mapControlsBox = document.getElementById('mapControlsBox');
+            const toggleIcon = document.getElementById('toggleMapUIIcon');
+            let mapUIVisible = true;
+            function setMapUIVisibility(show) {
+                filterBox.style.display = show ? 'flex' : 'none';
+                mapControlsBox.style.display = show ? 'flex' : 'none';
+                toggleIcon.textContent = show ? '👁️' : '🙈';
+            }
+            setMapUIVisibility(true);
+            toggleBtn.onclick = function () {
+                mapUIVisible = !mapUIVisible;
+                setMapUIVisibility(mapUIVisible);
+            };
 
             function drawMapWithDistance(maxDistance, refIndex) {
                 if (!window.upMap) {
@@ -916,19 +1000,29 @@
 
             // Initial draw
             let refIndex = parseInt(memberSelect.value);
-            drawMapWithDistance(Number(slider.value), refIndex);
+            drawMapWithDistance(Number(distanceInput.value), refIndex);
 
-            // Slider event
-            slider.oninput = function () {
-                sliderValue.textContent = slider.value;
+            // Real-time number input event (input, not just change)
+            distanceInput.addEventListener('input', function () {
+                let val = Math.max(1, Math.min(50, Number(distanceInput.value)));
+                distanceInput.value = val;
                 refIndex = parseInt(memberSelect.value);
-                drawMapWithDistance(Number(slider.value), refIndex);
-            };
+                drawMapWithDistance(val, refIndex);
+            });
+            // Mouse wheel for smooth scroll
+            distanceInput.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                let step = e.deltaY < 0 ? 1 : -1;
+                let val = Math.max(1, Math.min(50, Number(distanceInput.value) + step));
+                distanceInput.value = val;
+                refIndex = parseInt(memberSelect.value);
+                drawMapWithDistance(val, refIndex);
+            });
             // Member dropdown event
-            memberSelect.onchange = function () {
+            memberSelect.addEventListener('change', function () {
                 refIndex = parseInt(memberSelect.value);
-                drawMapWithDistance(Number(slider.value), refIndex);
-            };
+                drawMapWithDistance(Number(distanceInput.value), refIndex);
+            });
 
             // Map controls
             document.getElementById('zoomInBtn').onclick = () => window.upMap.zoomIn();
